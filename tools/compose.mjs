@@ -6,24 +6,26 @@ const TMP = `${REPO}/tools/.build`;
 execFileSync('mkdir', ['-p', TMP]);
 
 const F = {
-  serif: '/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf',
-  serifb: '/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf',
-  serifI: '/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf',
   sans: '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
   sansb: '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+  serifb: '/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf',
   mono: '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',
-  monob: '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf',
 };
 const C = {
-  paper: '#FAF8F3',
+  body: '#EEF1F5',
+  navy: '#11141B',
   ink: '#191419',
-  head: '#5A5359',
+  white: '#FFFFFF',
   magenta: '#BC0C7C',
   pale: '#FBE9F3',
-  red: '#B8102B',
-  band: '#F0E7E0',
-  rule: '#CDC4BD',
-  white: '#FFFFFF',
+  red: '#C21030',
+  green: '#2FBF71',
+  gray: '#667085',
+  border: '#D3DAE4',
+  panel: '#E6EBF2',
+  desk: '#C9D2DF',
+  deskEdge: '#AAB6C6',
+  deskFront: '#DAE1EB',
 };
 
 function run(args) {
@@ -40,18 +42,8 @@ function fit(font, size, value, max, where) {
   if (w > max) throw new Error(`${where}: ${w}px > ${max}px :: ${value}`);
   return w;
 }
-function leader(label, amount, size, target) {
-  let best = '';
-  for (let n = 2; n <= 22; n++) {
-    const candidate = `${label} ${'.'.repeat(n)} ${amount}`;
-    if (textW(F.serif, size, candidate) <= target) best = candidate;
-    else break;
-  }
-  if (!best) throw new Error(`leader failed: ${label}`);
-  return best;
-}
 
-const ops = ['-size', '1200x800', `xc:${C.paper}`, '-gravity', 'NorthWest'];
+const ops = ['-size', '1200x800', `xc:${C.body}`, '-gravity', 'NorthWest'];
 
 function draw(shape, fill, stroke = 'none', strokewidth = 1) {
   ops.push('-fill', fill, '-stroke', stroke, '-strokewidth', String(strokewidth), '-draw', shape);
@@ -59,10 +51,6 @@ function draw(shape, fill, stroke = 'none', strokewidth = 1) {
 function text(font, size, value, x, y, color = C.ink, max = 1200 - x) {
   fit(font, size, value, max, `text ${x},${y}`);
   ops.push('-font', font, '-pointsize', String(size), '-fill', color, '-stroke', 'none', '-annotate', `+${x}+${y}`, value);
-}
-function centered(font, size, value, y, color = C.ink) {
-  const w = fit(font, size, value, 1140, `center ${y}`);
-  text(font, size, value, Math.round((1200 - w) / 2), y, color);
 }
 function rightText(font, size, value, right, y, color = C.ink) {
   const w = fit(font, size, value, right, `right ${right},${y}`);
@@ -72,74 +60,64 @@ function composite(file, x, y) {
   ops.push(file, '-geometry', `+${x}+${y}`, '-composite');
 }
 
-draw('rectangle 12,12 1187,787', 'none', C.rule, 1);
-draw('rectangle 19,19 1180,780', 'none', C.rule, 1);
+draw('rectangle 0,0 1200,84', C.navy);
+text(F.sansb, 28, 'LEONIDA HELP DESK · TICKET #GTA-VI-4811', 28, 28, C.white, 800);
+draw(`circle 875,45 883,45`, C.green, C.green, 1);
+rightText(F.sansb, 28, 'STATUS: RESOLVED', 1172, 28, C.white);
 
-centered(F.serifb, 18, 'LEONIDA SILVER CIRCUIT COURT · DIVISION OF LONG-AWAITED RELEASES', 32, C.head);
-draw('line 44,62 1156,62', C.ink, C.ink, 2);
-
-centered(F.serifb, 72, 'CLASS ACTION SETTLED', 80);
-centered(F.serifb, 34, 'FOR THE 4,811-DAY WAIT', 142, C.magenta);
-centered(F.serifI, 26, 'GTA V 17 SEP 2013 → GTA VI 19 NOV 2026 · Jason & Lucia recover the full amount.', 188);
-draw('line 44,230 1156,230', C.ink, C.ink, 2);
-
-const items = [
-  ['Wait-time interest', '$0.00'],
-  ['Sick days drained', '$13.00'],
-  ['Trailer replays', '$0.87'],
-];
-items.forEach(([label, amount], i) => {
-  text(F.serif, 24, leader(label, amount, 24, 420), 44, 278 + i * 40);
-});
-draw('roundrectangle 40,404 492,468 6,6', C.pale, C.magenta, 2);
-text(F.serifb, 28, 'TOTAL SETTLEMENT $481.10', 54, 424, C.magenta, 430);
-text(F.serif, 14, 'Sick days non-refundable. Leonida law applies. No admission of liability.', 44, 682, C.head);
-
-const cx = 470;
-const cr = 930;
-const ct = 268;
-const cb = 660;
-draw(`roundrectangle ${cx},${ct} ${cr},${cb} 10,10`, C.white, C.ink, 3);
-draw(`rectangle ${cx + 8},${ct + 8} ${cr - 8},${ct + 52}`, C.band);
-text(F.sansb, 21, 'LEONIDA FEDERAL PAYOUT BANK', cx + 18, ct + 20, C.ink, 420);
-draw(`line ${cx + 18},${ct + 64} ${cr - 18},${ct + 64}`, C.rule, C.rule, 1);
-
-text(F.serif, 16, 'PAY TO THE ORDER OF', cx + 18, ct + 78, C.head, 240);
-text(F.sansb, 32, 'EVERYONE WHO WAITED', cx + 18, ct + 102, C.ink, 420);
-draw(`line ${cx + 18},${ct + 136} ${cr - 18},${ct + 136}`, C.ink, C.ink, 2);
-
-draw(`roundrectangle ${cr - 235},${ct + 144} ${cr - 18},${ct + 236} 8,8`, C.pale, C.magenta, 3);
-text(F.sansb, 16, 'AMOUNT', cr - 218, ct + 152, C.magenta, 160);
-text(F.sansb, 52, '$481.10', cr - 218, ct + 176, C.magenta, 210);
-
-text(F.mono, 15, 'MEMO: PATIENCE 2013-2026', cx + 18, ct + 162, C.ink, 230);
-text(F.mono, 14, 'SERIAL 0004811-VC', cx + 18, ct + 190, C.head, 220);
-
-text(F.serif, 16, 'L. Silver, Clerk of Long-Awaited Releases', cx + 18, ct + 230, C.ink, 420);
-draw(`line ${cx + 18},${ct + 256} ${cx + 290},${ct + 256}`, C.ink, C.ink, 2);
+draw('roundrectangle 24,100 1176,268 16,16', C.magenta);
+draw('roundrectangle 32,108 1168,260 12,12', 'none', '#D6419B', 1);
+text(F.sansb, 76, 'PAID — $481.10', 52, 190, C.white, 600);
 
 const stamp = `${TMP}/stamp.png`;
-run(['-size', '380x116', `xc:${C.white}`, '-gravity', 'Center',
-  '-fill', 'none', '-stroke', C.red, '-strokewidth', 7,
-  '-draw', 'roundrectangle 6,6 373,109 10,10',
-  '-stroke', 'none', '-font', F.sansb, '-fill', C.red,
-  '-pointsize', '42', '-annotate', '+0-22', 'MY AI AGENT',
-  '-pointsize', '42', '-annotate', '+0+24', 'ISSUED BY', stamp]);
-composite(stamp, 535, 552);
+run(['-size', '470x132', `xc:${C.white}`, '-gravity', 'Center',
+  '-fill', 'none', '-stroke', C.red, '-strokewidth', '8',
+  '-draw', 'roundrectangle 5,5 464,126 10,10',
+  '-strokewidth', '2', '-draw', 'roundrectangle 13,13 456,118 7,7',
+  '-stroke', 'none', '-font', F.serifb, '-fill', C.red,
+  '-pointsize', '26', '-annotate', '+0-36', 'SETTLED —',
+  '-pointsize', '38', '-annotate', '+0+6', 'MY AI AGENT',
+  '-pointsize', '22', '-annotate', '+0+38', 'ISSUED BY', stamp]);
+const stampRot = `${TMP}/stamp-rot.png`;
+run([stamp, '-background', 'none', '-rotate', '-3', stampRot]);
+composite(stampRot, 652, 110);
 
+draw('roundrectangle 24,284 900,676 14,14', C.white, C.border, 2);
+draw('roundrectangle 912,284 1176,676 14,14', C.panel, C.border, 2);
+
+const rows = [
+  ['SUBJECT', 'Your 13-year wait for GTA VI (2013 → 2026)'],
+  ['CLASS', 'Everyone who waited 4,811 days · Jason & Lucia included'],
+  ['RESOLUTION', 'Settlement check issued · $481.10 · to EVERYONE WHO WAITED'],
+];
+rows.forEach(([label, value], i) => {
+  const y = 344 + i * 100;
+  text(F.sansb, 18, label, 48, y, C.magenta, 300);
+  text(F.sansb, 26, value, 48, y + 34, C.ink, 828);
+  if (i === 0) draw('line 48,410 876,410', C.border, C.border, 1);
+  if (i === 1) draw('line 48,510 876,510', C.border, C.border, 1);
+});
+text(F.serifb, 26, 'ISSUED BY MY AI AGENT · make.fun', 48, 614, C.ink, 828);
+
+draw('roundrectangle 920,584 1168,668 6,6', C.deskFront, C.border, 1);
 const ghost = `${TMP}/ghost.png`;
 run(['assets/ghost-judge-paddle.png', '-trim', '+repage', '-resize', 'x250', ghost]);
-composite(ghost, 945, 375);
+composite(ghost, 938, 318);
+draw('roundrectangle 916,560 1172,586 6,6', C.desk, C.deskEdge, 1);
+draw('roundrectangle 972,600 1116,640 6,6', C.white, C.border, 1);
+text(F.sansb, 20, 'G. CLERK', 994, 628, C.ink, 110);
 
-draw('rectangle 23,710 1176,782', C.magenta);
+text(F.sans, 18, 'Delays "Fall 2025" and "May 2026" considered · no admission of liability · Leonida law applies.', 28, 704, C.gray, 1140);
+
+draw('rectangle 0,730 1200,800', C.magenta);
 const mark = `${TMP}/mark.png`;
-run(['assets/ghost-mark.png', '-trim', '+repage', '-resize', '46x46!', mark]);
-composite(mark, 42, 723);
-text(F.sansb, 25, 'PAID BY MY AI AGENT · make.fun bounty winnings', 104, 726, C.white, 760);
+run(['assets/ghost-mark.png', '-trim', '+repage', '-resize', '48x48!', mark]);
+composite(mark, 32, 741);
+text(F.serifb, 28, 'PAID BY MY AI AGENT · make.fun bounty winnings', 96, 772, C.white, 880);
 const lockup = `${TMP}/lockup.png`;
 run(['assets/lockup.png', '-trim', '+repage', '-channel', 'RGB', '-fill', 'white', '-colorize', '100', '+channel', '-resize', 'x52', lockup]);
 const lockW = Number(info([lockup, '-format', '%w', 'info:']));
-composite(lockup, 1160 - lockW, 720);
+composite(lockup, 1160 - lockW, 739);
 
 ops.push(OUT);
 run(ops);
