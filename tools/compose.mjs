@@ -100,7 +100,7 @@ text(F.mono, 14, 'CASE NO. VC-13-4811', 44, 106, C.ink, 300);
 rightText(F.mono, 14, 'FILED: 19 NOV 2026', 1156, 106);
 
 centered(F.serifb, 44, 'NOTICE OF CLASS ACTION SETTLEMENT', 132);
-centered(F.serifI, 21, 'In re: the 13-year wait for Grand Theft Auto VI', 184, C.magenta);
+centered(F.serifI, 26, 'In re: the 13-year wait for Grand Theft Auto VI — Jason & Lucia', 184, C.magenta);
 draw('line 44,214 1156,214', C.ink, C.ink, 2);
 
 const noticeX = 44;
@@ -162,6 +162,7 @@ rightText(F.monob, 15, 'SERIAL 0004811-VC', cr - 18, ct + 191);
 text(F.serif, 21, 'L. Silver, Clerk of Long-Awaited Releases', cx + 18, ct + 257, C.ink, 440);
 draw(`line ${cx + 18},${ct + 286} ${cx + 282},${ct + 286}`, C.ink, C.ink, 2);
 text(F.sans, 13, 'AUTHORIZED SIGNATURE', cx + 18, ct + 294, C.ink, 240);
+text(F.serif, 13, 'Sick days non-refundable. Leonida law applies.', cx + 18, ct + 328, C.ink, 300);
 
 draw(`rectangle ${cx + 8},${cb - 34} ${cr - 8},${cb - 8}`, C.band);
 text(F.monob, 14, 'VOID AFTER 4,811 DAYS', cx + 18, cb - 27, C.ink, 300);
